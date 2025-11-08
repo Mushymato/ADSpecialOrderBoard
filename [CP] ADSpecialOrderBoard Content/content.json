@@ -1,0 +1,101 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.8.0",
+  "Changes": [
+    // Add action to bus stop
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 26,
+            "Y": 21
+          },
+          "Layer": "Buildings",
+          "SetProperties": {
+            "Action": "mushymato.ADSpecialOrderBoard_Show {{ModId}}_Default"
+          }
+        },
+      ]
+    },
+    // Board
+    {
+      "Action": "Load",
+      "FromFile": "assets/default.png",
+      "Target": "{{ModId}}_default"
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.ADSpecialOrderBoard/Boards/{{ModId}}_Default",
+      "Entries": {
+        "Background": "{{ModId}}_default",
+        "TextArea": {
+          "X": 63,
+          "Y": 44,
+          "Width": 139,
+          "Height": 112
+        },
+        "ImageArea": {
+          "X": 229,
+          "Y": 42,
+          "Width": 63,
+          "Height": 75
+        },
+      }
+    },
+    // SO
+    {
+      "Action": "EditData",
+      "Target": "Data/SpecialOrders",
+      "Entries": {
+        "{{ModId}}_SO_Test": {
+          "Name": "mushymato.ADSpecialOrderBoard Test1",
+          "Requester": "Willy",
+          "Duration": "Week",
+          "Repeatable": true,
+          "RequiredTags": "",
+          "Condition": "",
+          "OrderType": "mushymato.ADSpecialOrderBoard/{{ModId}}_Default",
+          "SpecialRule": "",
+          "Text": "[Willy_Text]",
+          "ItemToRemoveOnEnd": null,
+          "MailToRemoveOnEnd": null,
+          "RandomizedElements": null,
+          "Objectives": [
+            {
+              "Type": "Collect",
+              "Text": "[Willy_Objective_0_Text]",
+              "RequiredCount": "100",
+              "Data": {
+                "AcceptedContextTags": "item_bug_meat"
+              }
+            },
+            {
+              "Type": "Donate",
+              "Text": "[Willy_Objective_1_Text]",
+              "RequiredCount": "100",
+              "Data": {
+                "DropBox": "WillyBarrel",
+                "DropBoxGameLocation": "Beach",
+                "DropBoxIndicatorLocation": "37 32",
+                "AcceptedContextTags": "item_bug_meat"
+              }
+            }
+          ],
+          "Rewards": [
+            {
+              "Type": "Money",
+              "Data": {
+                "Amount": "3000"
+              }
+            },
+          ],
+          "CustomFields": {
+            "mushymato.ADSpecialOrderBoard/Image": "LooseSprites/nightbg 32 0 64 64"
+          }
+        },
+      }
+    }
+  ]
+}
