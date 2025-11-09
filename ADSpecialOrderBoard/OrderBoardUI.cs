@@ -26,6 +26,9 @@ public sealed class OrderBoardUI : IClickableMenu
     private readonly Texture2D? orderImage = null;
     private readonly Rectangle orderImageSourceRect = Rectangle.Empty;
 
+    private Rectangle requesterMugShotSourceRect = Rectangle.Empty;
+    private readonly Texture2D? requesterTexture = null;
+
     public static OrderBoardUI? MakeOrderBoard(string orderBoardId)
     {
         if (ModEntry.LoADSpecialOrderBoardData(orderBoardId) is OrderBoardData orderBoardData)
@@ -116,6 +119,13 @@ public sealed class OrderBoardUI : IClickableMenu
             textArea.Width
         );
         daysLeftTextPos = new Vector2(textArea.X + 48 + 8, textArea.Bottom - acceptQuestTextLen.Y / 2 - 24);
+
+        if (!string.IsNullOrEmpty(currentOrder.requester.Value) && Game1.getCharacterFromName(currentOrder.requester.Value) is NPC requesterNPC)
+        {
+            requesterTexture = requesterNPC.Sprite.Texture;
+            requesterMugShotSourceRect = requesterNPC.getMugShotSourceRect();
+            requesterMugShotSourceRect.Height -= 5;
+        }
 
         if (
             currentOrder
@@ -216,6 +226,7 @@ public sealed class OrderBoardUI : IClickableMenu
                 TokenStringBuilder.SpecialOrderName(currentOrder.questKey.Value)
             );
             acceptButtonCC.visible = false;
+            acceptButtonCC.scale = 1f;
             return;
         }
         base.receiveLeftClick(x, y, playSound);
@@ -250,9 +261,11 @@ public sealed class OrderBoardUI : IClickableMenu
                     : Game1.dialogueFont;
             Color textColor = Game1.textColor;
             float intensity = 0.5f;
+            float alpha = 1f;
             if (!(acceptButtonCC?.visible ?? false))
             {
-                textColor *= 0.4f;
+                alpha = 0.4f;
+                textColor *= alpha;
                 intensity = 0.1f;
             }
 
@@ -281,11 +294,7 @@ public sealed class OrderBoardUI : IClickableMenu
                 spriteFont,
                 new Vector2(textArea.X, textY),
                 textColor,
-                1f,
-                -1f,
-                -1,
-                -1,
-                intensity
+                shadowIntensity: intensity
             );
 
             Utility.drawWithShadow(
@@ -293,7 +302,7 @@ public sealed class OrderBoardUI : IClickableMenu
                 Game1.mouseCursors,
                 new Vector2(daysLeftTextPos.X - 48, daysLeftTextPos.Y),
                 new Rectangle(410, 501, 9, 9),
-                Color.White,
+                Color.White * alpha,
                 0f,
                 Vector2.Zero,
                 4f,
@@ -309,11 +318,7 @@ public sealed class OrderBoardUI : IClickableMenu
                 Game1.dialogueFont,
                 daysLeftTextPos,
                 textColor,
-                1f,
-                -1f,
-                -1,
-                -1,
-                intensity
+                shadowIntensity: intensity
             );
 
             if (orderImage != null)
@@ -321,8 +326,26 @@ public sealed class OrderBoardUI : IClickableMenu
                 b.Draw(orderImage, imageArea, orderImageSourceRect, Color.White);
             }
 
-            if (acceptButtonCC?.visible ?? false)
+            if (acceptButtonCC != null)
             {
+                if (requesterTexture != null)
+                {
+                    b.Draw(
+                        requesterTexture,
+                        new Vector2(
+                            acceptButtonCC.bounds.Right - requesterMugShotSourceRect.Width * 4 - 16,
+                            acceptButtonCC.bounds.Y - requesterMugShotSourceRect.Height * 4
+                        ),
+                        requesterMugShotSourceRect,
+                        Color.White * alpha,
+                        0f,
+                        Vector2.Zero,
+                        4f,
+                        SpriteEffects.None,
+                        1f
+                    );
+                }
+
                 drawTextureBox(
                     b,
                     Game1.mouseCursors,
@@ -331,8 +354,9 @@ public sealed class OrderBoardUI : IClickableMenu
                     acceptButtonCC.bounds.Y,
                     acceptButtonCC.bounds.Width,
                     acceptButtonCC.bounds.Height,
-                    (acceptButtonCC.scale > 1f) ? Color.LightPink : Color.White,
-                    4f * acceptButtonCC.scale
+                    (acceptButtonCC.scale > 1f) ? Color.LightPink : Color.White * alpha,
+                    4f * acceptButtonCC.scale,
+                    drawShadow: acceptButtonCC.visible
                 );
                 Utility.drawTextWithShadow(
                     b,
@@ -342,7 +366,8 @@ public sealed class OrderBoardUI : IClickableMenu
                         acceptButtonCC.bounds.X + 12,
                         acceptButtonCC.bounds.Y + (LocalizedContentManager.CurrentLanguageLatin ? 16 : 12)
                     ),
-                    Game1.textColor
+                    textColor,
+                    shadowIntensity: intensity
                 );
             }
         }
