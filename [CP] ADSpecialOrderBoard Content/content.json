@@ -42,6 +42,20 @@
           "Width": 63,
           "Height": 75
         },
+        "DefaultRequesterTexture": "Characters/Monsters/Angry Roger",
+        "DefaultRequesterSourceRect": {
+          "X": 0,
+          "Y": 128,
+          "Width": 16,
+          "Height": 19
+        },
+        "ButtonTexture": "LooseSprites/Cursors",
+        "ButtonSourceRect": {
+          "X": 384,
+          "Y": 396,
+          "Width": 15,
+          "Height": 15
+        },
       }
     },
     // SO
@@ -50,7 +64,7 @@
       "Target": "Data/SpecialOrders",
       "Entries": {
         "{{ModId}}_SO_Test": {
-          "Name": "mushymato.ADSpecialOrderBoard Test1",
+          "Name": "ADSpecialOrderBoard Test1",
           "Requester": "Willy",
           "Duration": "Week",
           "Repeatable": true,
@@ -94,6 +108,39 @@
           "CustomFields": {
             "mushymato.ADSpecialOrderBoard/Image": "LooseSprites/nightbg 32 0 64 64"
           }
+        },
+        "{{ModId}}_SO_Test2": {
+          "Name": "ADSpecialOrderBoard Test2",
+          "Requester": null,
+          "Duration": "Week",
+          "Repeatable": true,
+          "RequiredTags": "",
+          "Condition": "",
+          "OrderType": "mushymato.ADSpecialOrderBoard/{{ModId}}_Default",
+          "SpecialRule": "",
+          "Text": "[QiChallenge10_Text]",
+          "ItemToRemoveOnEnd": null,
+          "MailToRemoveOnEnd": null,
+          "RandomizedElements": null,
+          "Objectives": [
+            {
+              "Type": "ReachMineFloor",
+              "Text": "[QiChallenge10_Objective_0_Text]",
+              "RequiredCount": "100",
+              "Data": {
+                "SkullCave": "true"
+              }
+            }
+          ],
+          "Rewards": [
+            {
+              "Type": "Gems",
+              "Data": {
+                "Amount": "40"
+              }
+            }
+          ],
+          "CustomFields": null
         },
       }
     }

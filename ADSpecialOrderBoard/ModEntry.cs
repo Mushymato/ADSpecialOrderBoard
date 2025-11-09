@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.SpecialOrders;
 
 namespace ADSpecialOrderBoard;
 
@@ -11,6 +12,10 @@ public class OrderBoardData
     public string? Background { get; set; } = null;
     public Rectangle TextArea { get; set; } = Rectangle.Empty;
     public Rectangle ImageArea { get; set; } = Rectangle.Empty;
+    public string? DefaultRequesterTexture { get; set; } = null;
+    public Rectangle DefaultRequesterSourceRect { get; set; } = new Rectangle(0, 0, 16, 19);
+    public string? ButtonTexture { get; set; } = null;
+    public Rectangle ButtonSourceRect { get; set; } = Rectangle.Empty;
 }
 
 public sealed class ModEntry : Mod
@@ -26,6 +31,8 @@ public sealed class ModEntry : Mod
     public const string DataAssetPrefix = $"{ModId}/Boards";
     public const string TileAction = $"{ModId}_Show";
     private static IMonitor? mon;
+
+    private static readonly HashSet<string> hasRefreshedToday = [];
 
     internal static OrderBoardData? LoADSpecialOrderBoardData(string orderBoardId)
     {
@@ -44,6 +51,11 @@ public sealed class ModEntry : Mod
         helper.Events.Content.AssetRequested += OnAssetRequested;
 
         GameLocation.RegisterTileAction(TileAction, TileActionShowQuestBoard);
+    }
+
+    internal static void RefreshSpecialOrders(string orderType)
+    {
+        SpecialOrder.UpdateAvailableSpecialOrders(orderType, forceRefresh: !hasRefreshedToday.Contains(orderType));
     }
 
     private void OnAssetRequested(object? sender, AssetRequestedEventArgs e)

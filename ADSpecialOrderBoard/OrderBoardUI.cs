@@ -18,7 +18,9 @@ public sealed class OrderBoardUI : IClickableMenu
 
     private Rectangle textArea = Rectangle.Empty;
     private readonly ClickableComponent? acceptButtonCC = null;
-    private readonly string acceptQuestText = Game1.content.LoadString("Strings\\UI:AcceptQuest");
+    private readonly string acceptButtonText = Game1.content.LoadString("Strings\\UI:AcceptQuest");
+    private readonly Texture2D acceptButtonTexture = Game1.mouseCursors;
+    private readonly Rectangle acceptButtonSourceRect = new(403, 373, 9, 9);
     private readonly string daysLeftText = Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11374");
     private Vector2 daysLeftTextPos = Vector2.Zero;
 
@@ -65,7 +67,10 @@ public sealed class OrderBoardUI : IClickableMenu
         {
             foreach (SpecialOrder specialOrder in Game1.player.team.specialOrders)
             {
-                if (specialOrder.orderType.Value == orderType)
+                if (
+                    specialOrder.orderType.Value == orderType
+                    && specialOrder.questState.Value == SpecialOrderStatus.InProgress
+                )
                 {
                     currentOrder = specialOrder;
                     break;
@@ -75,8 +80,9 @@ public sealed class OrderBoardUI : IClickableMenu
         }
         if (!hasAcceptedOrder)
         {
-            SpecialOrder.UpdateAvailableSpecialOrders(orderType, forceRefresh: false);
+            ModEntry.RefreshSpecialOrders(orderType);
             currentOrder = Game1.player.team.GetAvailableSpecialOrder(0, orderType);
+            currentOrder.SetDuration(currentOrder.questDuration.Value);
         }
 
         if (currentOrder == null)
@@ -91,7 +97,7 @@ public sealed class OrderBoardUI : IClickableMenu
             orderBoardData.TextArea.Height * SCALE
         );
 
-        Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptQuestText);
+        Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptButtonText);
         acceptButtonCC = new ClickableComponent(
             new Rectangle(
                 (int)(textArea.Right - acceptQuestTextLen.X - 24),
@@ -109,6 +115,11 @@ public sealed class OrderBoardUI : IClickableMenu
             downNeighborID = -99998,
             visible = !hasAcceptedOrder,
         };
+        if (!string.IsNullOrEmpty(orderBoardData.ButtonTexture))
+        {
+            acceptButtonTexture = Game1.content.Load<Texture2D>(orderBoardData.ButtonTexture);
+            acceptButtonSourceRect = orderBoardData.ButtonSourceRect;
+        }
 
         int daysLeft = currentOrder.GetDaysLeft();
         daysLeftText = Game1.parseText(
@@ -120,11 +131,19 @@ public sealed class OrderBoardUI : IClickableMenu
         );
         daysLeftTextPos = new Vector2(textArea.X + 48 + 8, textArea.Bottom - acceptQuestTextLen.Y / 2 - 24);
 
-        if (!string.IsNullOrEmpty(currentOrder.requester.Value) && Game1.getCharacterFromName(currentOrder.requester.Value) is NPC requesterNPC)
+        if (
+            !string.IsNullOrEmpty(currentOrder.requester.Value)
+            && Game1.getCharacterFromName(currentOrder.requester.Value) is NPC requesterNPC
+        )
         {
             requesterTexture = requesterNPC.Sprite.Texture;
             requesterMugShotSourceRect = requesterNPC.getMugShotSourceRect();
             requesterMugShotSourceRect.Height -= 5;
+        }
+        else if (!string.IsNullOrEmpty(orderBoardData.DefaultRequesterTexture))
+        {
+            requesterTexture = Game1.content.Load<Texture2D>(orderBoardData.DefaultRequesterTexture);
+            requesterMugShotSourceRect = orderBoardData.DefaultRequesterSourceRect;
         }
 
         if (
@@ -178,7 +197,7 @@ public sealed class OrderBoardUI : IClickableMenu
                 orderBoardData.TextArea.Height * SCALE
             );
 
-        Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptQuestText);
+        Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptButtonText);
         if (acceptButtonCC != null)
         {
             acceptButtonCC.bounds = new Rectangle(
@@ -348,8 +367,8 @@ public sealed class OrderBoardUI : IClickableMenu
 
                 drawTextureBox(
                     b,
-                    Game1.mouseCursors,
-                    new Rectangle(403, 373, 9, 9),
+                    acceptButtonTexture,
+                    acceptButtonSourceRect,
                     acceptButtonCC.bounds.X,
                     acceptButtonCC.bounds.Y,
                     acceptButtonCC.bounds.Width,
@@ -360,7 +379,7 @@ public sealed class OrderBoardUI : IClickableMenu
                 );
                 Utility.drawTextWithShadow(
                     b,
-                    acceptQuestText,
+                    acceptButtonText,
                     Game1.dialogueFont,
                     new Vector2(
                         acceptButtonCC.bounds.X + 12,
