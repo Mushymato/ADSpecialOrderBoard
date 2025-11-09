@@ -20,7 +20,7 @@ public sealed class OrderBoardUI : IClickableMenu
     private readonly ClickableComponent? acceptButtonCC = null;
     private readonly string acceptQuestText = Game1.content.LoadString("Strings\\UI:AcceptQuest");
     private readonly string daysLeftText = Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11374");
-    private readonly Vector2 daysLeftTextPos = Vector2.Zero;
+    private Vector2 daysLeftTextPos = Vector2.Zero;
 
     private Rectangle imageArea = Rectangle.Empty;
     private readonly Texture2D? orderImage = null;
@@ -88,22 +88,11 @@ public sealed class OrderBoardUI : IClickableMenu
             orderBoardData.TextArea.Height * SCALE
         );
 
-        int daysLeft = currentOrder.GetDaysLeft();
-        daysLeftText = Game1.parseText(
-            (daysLeft > 1)
-                ? Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11374", daysLeft)
-                : Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11375", daysLeft),
-            Game1.dialogueFont,
-            textArea.Width
-        );
-        Vector2 daysLeftTextSize = Game1.dialogueFont.MeasureString(acceptQuestText);
-        daysLeftTextPos = new Vector2(textArea.X + 48 + 8, textArea.Bottom - daysLeftTextSize.Y * 1.5f);
-
         Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptQuestText);
         acceptButtonCC = new ClickableComponent(
             new Rectangle(
-                (int)(textArea.Left + textArea.Width / 2 - acceptQuestTextLen.X / 2 - 12),
-                (int)(textArea.Bottom - acceptQuestTextLen.Y / 2 - 24),
+                (int)(textArea.Right - acceptQuestTextLen.X - 24),
+                (int)(textArea.Bottom - acceptQuestTextLen.Y / 2 - 36),
                 (int)acceptQuestTextLen.X + 24,
                 (int)acceptQuestTextLen.Y + 24
             ),
@@ -117,6 +106,16 @@ public sealed class OrderBoardUI : IClickableMenu
             downNeighborID = -99998,
             visible = !hasAcceptedOrder,
         };
+
+        int daysLeft = currentOrder.GetDaysLeft();
+        daysLeftText = Game1.parseText(
+            (daysLeft > 1)
+                ? Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11374", daysLeft)
+                : Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11375", daysLeft),
+            Game1.dialogueFont,
+            textArea.Width
+        );
+        daysLeftTextPos = new Vector2(textArea.X + 48 + 8, textArea.Bottom - acceptQuestTextLen.Y / 2 - 24);
 
         if (
             currentOrder
@@ -169,16 +168,17 @@ public sealed class OrderBoardUI : IClickableMenu
                 orderBoardData.TextArea.Height * SCALE
             );
 
+        Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptQuestText);
         if (acceptButtonCC != null)
         {
-            Vector2 acceptQuestTextLen = Game1.dialogueFont.MeasureString(acceptQuestText);
             acceptButtonCC.bounds = new Rectangle(
-                (int)(textArea.Left + textArea.Width / 2 - acceptQuestTextLen.X / 2 - 12),
+                (int)(textArea.Right - acceptQuestTextLen.X - 12),
                 (int)(textArea.Bottom - acceptQuestTextLen.Y / 2 - 24),
                 (int)acceptQuestTextLen.X + 24,
                 (int)acceptQuestTextLen.Y + 24
             );
         }
+        daysLeftTextPos = new Vector2(textArea.X + 48 + 8, textArea.Bottom - acceptQuestTextLen.Y / 2 - 24);
 
         if (!imageArea.IsEmpty)
             imageArea = new(
