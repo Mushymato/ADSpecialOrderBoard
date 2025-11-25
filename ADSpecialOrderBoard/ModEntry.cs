@@ -16,6 +16,8 @@ public class OrderBoardData
     public Rectangle DefaultRequesterSourceRect { get; set; } = new Rectangle(0, 0, 16, 19);
     public string? ButtonTexture { get; set; } = null;
     public Rectangle ButtonSourceRect { get; set; } = Rectangle.Empty;
+    public string? TimeLeftClockTexture { get; set; } = null;
+    public Rectangle TimeLeftClockSourceRect { get; set; } = Rectangle.Empty;
 }
 
 public sealed class ModEntry : Mod

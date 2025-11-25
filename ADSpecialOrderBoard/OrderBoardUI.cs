@@ -21,6 +21,8 @@ public sealed class OrderBoardUI : IClickableMenu
     private readonly string acceptButtonText = Game1.content.LoadString("Strings\\UI:AcceptQuest");
     private readonly Texture2D acceptButtonTexture = Game1.mouseCursors;
     private readonly Rectangle acceptButtonSourceRect = new(403, 373, 9, 9);
+    private readonly Texture2D timeLeftClockTexture = Game1.mouseCursors;
+    private readonly Rectangle timeLeftClockSourceRect = new(410, 501, 9, 9);
     private readonly string daysLeftText = Game1.content.LoadString("Strings\\StringsFromCSFiles:QuestLog.cs.11374");
     private Vector2 daysLeftTextPos = Vector2.Zero;
 
@@ -118,7 +120,19 @@ public sealed class OrderBoardUI : IClickableMenu
         if (!string.IsNullOrEmpty(orderBoardData.ButtonTexture))
         {
             acceptButtonTexture = Game1.content.Load<Texture2D>(orderBoardData.ButtonTexture);
-            acceptButtonSourceRect = orderBoardData.ButtonSourceRect;
+            if (orderBoardData.ButtonSourceRect.IsEmpty)
+                acceptButtonSourceRect = acceptButtonTexture.Bounds;
+            else
+                acceptButtonSourceRect = orderBoardData.ButtonSourceRect;
+        }
+        if (!string.IsNullOrEmpty(orderBoardData.TimeLeftClockTexture))
+        {
+            timeLeftClockTexture = Game1.content.Load<Texture2D>(orderBoardData.TimeLeftClockTexture);
+            timeLeftClockSourceRect = orderBoardData.TimeLeftClockSourceRect;
+            if (orderBoardData.TimeLeftClockSourceRect.IsEmpty)
+                timeLeftClockSourceRect = timeLeftClockTexture.Bounds;
+            else
+                timeLeftClockSourceRect = orderBoardData.TimeLeftClockSourceRect;
         }
 
         int daysLeft = currentOrder.GetDaysLeft();
@@ -144,6 +158,10 @@ public sealed class OrderBoardUI : IClickableMenu
         {
             requesterTexture = Game1.content.Load<Texture2D>(orderBoardData.DefaultRequesterTexture);
             requesterMugShotSourceRect = orderBoardData.DefaultRequesterSourceRect;
+            if (orderBoardData.DefaultRequesterSourceRect.IsEmpty)
+                requesterMugShotSourceRect = requesterTexture.Bounds;
+            else
+                requesterMugShotSourceRect = orderBoardData.DefaultRequesterSourceRect;
         }
 
         if (
@@ -178,6 +196,12 @@ public sealed class OrderBoardUI : IClickableMenu
                     orderBoardData.ImageArea.Height * SCALE
                 );
             }
+        }
+
+        if (Game1.options.SnappyMenus)
+        {
+            populateClickableComponentList();
+            snapToDefaultClickableComponent();
         }
     }
 
@@ -216,6 +240,29 @@ public sealed class OrderBoardUI : IClickableMenu
                 orderBoardData.ImageArea.Width * SCALE,
                 orderBoardData.ImageArea.Height * SCALE
             );
+
+        if (Game1.options.SnappyMenus)
+        {
+            snapToDefaultClickableComponent();
+        }
+    }
+
+    public override void populateClickableComponentList()
+    {
+        allClickableComponents = [];
+        if (acceptButtonCC != null)
+        {
+            allClickableComponents.Add(acceptButtonCC);
+        }
+    }
+
+    public override void snapToDefaultClickableComponent()
+    {
+        if (allClickableComponents.Any())
+        {
+            currentlySnappedComponent = getComponentWithID(0);
+            snapCursorToCurrentSnappedComponent();
+        }
     }
 
     public override void performHoverAction(int x, int y)
@@ -318,9 +365,9 @@ public sealed class OrderBoardUI : IClickableMenu
 
             Utility.drawWithShadow(
                 b,
-                Game1.mouseCursors,
+                timeLeftClockTexture,
                 new Vector2(daysLeftTextPos.X - 48, daysLeftTextPos.Y),
-                new Rectangle(410, 501, 9, 9),
+                timeLeftClockSourceRect,
                 Color.White * alpha,
                 0f,
                 Vector2.Zero,
